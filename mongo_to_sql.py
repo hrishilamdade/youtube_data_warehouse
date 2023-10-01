@@ -20,7 +20,7 @@ def map_mongo_to_mysql(document):
     channel_name = document.get("channel_name")
     channel_id = document.get("Channel_Id")
     subscription_count = document.get("Subscription_Count")
-    channel_views = document.get("Channel_Views")
+    channel_views = int(document.get("Channel_Views"))
     channel_description = document.get("Channel_Description")
     playlist_id = document.get("Playlist_Id")
     # playlist_name = document.get("Playlist_Name")

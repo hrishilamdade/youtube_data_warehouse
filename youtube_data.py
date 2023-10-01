@@ -12,6 +12,7 @@ import json
 from googleapiclient.discovery import build
 from pymongo import MongoClient
 import mongo_to_sql as mts
+import isodate
 
 api_key = "AIzaSyAiLu35C7PfSNssGea0emeToJFwkaqY1xc"
 
@@ -23,6 +24,10 @@ for document in db["channels"].find():
     id_to_name_mapper[document.get("Channel_Id")] = document.get("channel_name")
 
 # Function to fetch and insert channel data into MongoDB
+def get_duration_in_seconds(duration):
+    total_seconds = isodate.parse_duration(duration).total_seconds()
+    return total_seconds
+
 def fetch_channel_data(channel_id):
     youtube = build("youtube", "v3", developerKey=api_key)
     try:
@@ -62,7 +67,7 @@ def fetch_video_data(channel_id):
         request = youtube.search().list(
             part='id',
             channelId=channel_id,
-            maxResults=1,  # change this as per your requirement
+            maxResults=10,  # change this as per your requirement
             type='video'
         )
         response = request.execute()
@@ -90,7 +95,7 @@ def fetch_video_data(channel_id):
                     "Dislike_Count": int(video_data["statistics"]["dislikeCount"]) if "dislikeCount" in video_data["statistics"] else 0,
                     "Favorite_Count": int(video_data["statistics"]["favoriteCount"]) if "favoriteCount" in video_data["statistics"] else 0,
                     "Comment_Count": int(video_data["statistics"]["commentCount"]) if "commentCount" in video_data["statistics"] else 0,
-                    "Duration": video_data["contentDetails"]["duration"],
+                    "Duration": get_duration_in_seconds(video_data["contentDetails"]["duration"]),
                     "Thumbnail": video_data["snippet"]["thumbnails"]["default"]["url"],
                     "Caption_Status": video_data["contentDetails"]["caption"],
                     "Comments": {}
